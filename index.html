@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Blackboard | Languapps Student Forum</title>
+    <link rel="shortcut icon" href="/images/yata.svg">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Caveat:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1a3a1a;
+            background-image: 
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 4px),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 4px);
+            font-family: 'Caveat', cursive;
+            color: #e8e8e8;
+            min-height: 100vh;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="8" fill="white" opacity="0.7"/></svg>'), auto;
+        }
+        
+        .chalk-dust {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 50px 50px, 80px 80px;
+            background-position: 0 0, 40px 40px;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        header {
+            background: linear-gradient(180deg, #0d260d 0%, #1a3a1a 100%);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 5px solid #8b4513;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: repeating-linear-gradient(90deg, #8b4513 0px, #8b4513 20px, #a0522d 20px, #a0522d 40px);
+        }
+        
+        h1 {
+            font-family: 'Permanent Marker', cursive;
+            color: #fff;
+            font-size: 3em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            margin-bottom: 10px;
+            transform: rotate(-1deg);
+        }
+        
+        .subtitle {
+            font-size: 1.5em;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .auth-box {
+            background: rgba(26, 58, 26, 0.9);
+            border: 3px solid #8b4513;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+        
+        .auth-box h2 {
+            font-family: 'Permanent Marker', cursive;
+            color: #ffd700;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.3em;
+        }
+        
+        .user-info span {
+            color: #90EE90;
+            font-weight: bold;
+        }
+        
+        button {
+            background: #8b4513;
+            color: white;
+            border: 2px solid #a0522d;
+            padding: 12px 25px;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1em;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.4);
+        }
+        
+        button:hover {
+            background: #a0522d;
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 12px rgba(0,0,0,0.6);
+        }
+        
+        .write-post-box {
+            background: rgba(26, 58, 26, 0.95);
+            border: 4px dashed #ffd700;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+        }
+        
+        .write-post-box h2 {
+            font-family: 'Permanent Marker', cursive;
+            color: #ffd700;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 15px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.3em;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255,255,255,0.15);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        input::placeholder, textarea::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .post-card {
+            background: rgba(255, 248, 220, 0.95);
+            border: 3px solid #8b4513;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+            transform: rotate(-1deg);
+            transition: all 0.3s;
+            color: #2c2c2c;
+        }
+        
+        .post-card:nth-child(even) {
+            transform: rotate(1deg);
+        }
+        
+        .post-card:hover {
+            transform: rotate(0deg) scale(1.05);
+            box-shadow: 8px 8px 25px rgba(0,0,0,0.7);
+            z-index: 10;
+        }
+        
+        .post-card::before {
+            content: '📌';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2em;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+        }
+        
+        .post-title {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 1.5em;
+            color: #8b4513;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+        }
+        
+        .post-content {
+            font-size: 1.2em;
+            line-height: 1.6;
+            color: #3c3c3c;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+        }
+        
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #666;
+            padding-top: 15px;
+            border-top: 2px dashed rgba(139, 69, 19, 0.3);
+        }
+        
+        .post-author {
+            font-weight: bold;
+            color: #8b4513;
+        }
+        
+        .post-date {
+            font-style: italic;
+        }
+        
+        .delete-btn {
+            background: #d32f2f;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .delete-btn:hover {
+            background: #b71c1c;
+        }
+        
+        .eraser {
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(135deg, #f5f5dc 0%, #fffacd 100%);
+            border: 2px solid #8b4513;
+            border-radius: 5px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .eraser:hover {
+            transform: rotate(15deg) scale(1.1);
+        }
+        
+        .no-posts {
+            text-align: center;
+            font-size: 2em;
+            color: rgba(255,255,255,0.5);
+            margin: 100px 0;
+            font-family: 'Permanent Marker', cursive;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chalk-dust"></div>
+    
+    <header>
+        <h1>📝 The Blackboard</h1>
+        <p class="subtitle">Share your learning journey</p>
+    </header>
+    
+    <div class="container">
+        <!-- Auth Section -->
+        <div class="auth-box" id="authSection">
+            <h2>Sign in to post</h2>
+            <p style="margin-bottom: 20px;">Use your Languapps account to share your thoughts</p>
+            <button onclick="signInWithGoogle()">Sign In with Google</button>
+        </div>
+        
+        <div class="auth-box" id="userSection" style="display: none;">
+            <div class="user-info">
+                <span>✏️ Signed in as:</span>
+                <span id="userName"></span>
+                <button onclick="signOut()">Sign Out</button>
+            </div>
+        </div>
+        
+        <!-- Write Post Section (only visible when logged in) -->
+        <div class="write-post-box" id="writePostBox" style="display: none;">
+            <h2>✍️ Write on the board</h2>
+            <input type="text" id="postTitle" placeholder="Title your thought..." maxlength="100">
+            <textarea id="postContent" placeholder="Share what you learned today..."></textarea>
+            <button onclick="createPost()">Post to Board</button>
+        </div>
+        
+        <!-- Posts Display -->
+        <div id="postsContainer" class="posts-grid">
+            <div class="no-posts">The blackboard is empty... be the first to write!</div>
+        </div>
+    </div>
+    
+    <div class="eraser" title="Erase posts (Admin only)"></div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Your Firebase config (replace with your actual config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        const adminEmail = "YOUR_EMAIL@gmail.com"; // Change to your email
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('userSection').style.display = 'block';
+                document.getElementById('writePostBox').style.display = 'block';
+                document.getElementById('userName').textContent = user.displayName || user.email;
+            } else {
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('userSection').style.display = 'none';
+                document.getElementById('writePostBox').style.display = 'none';
+            }
+        });
+
+        // Sign in
+        window.signInWithGoogle = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error('Sign in error:', error);
+                alert('Error signing in: ' + error.message);
+            }
+        };
+
+        // Sign out
+        window.signOut = async () => {
+            try {
+                await firebaseSignOut(auth);
+            } catch (error) {
+                console.error('Sign out error:', error);
+            }
+        };
+
+        // Create post
+        window.createPost = async () => {
+            if (!currentUser) {
+                alert('Please sign in first!');
+                return;
+            }
+
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+
+            if (!title || !content) {
+                alert('Please fill in both title and content!');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, 'blackboard_posts'), {
+                    title: title,
+                    content: content,
+                    author: currentUser.displayName || currentUser.email,
+                    authorId: currentUser.uid,
+                    authorEmail: currentUser.email,
+                    createdAt: serverTimestamp()
+                });
+
+                // Clear form
+                document.getElementById('postTitle').value = '';
+                document.getElementById('postContent').value = '';
+
+                alert('Posted to the blackboard! ✓');
+            } catch (error) {
+                console.error('Error creating post:', error);
+                alert('Error posting: ' + error.message);
+            }
+        };
+
+        // Delete post
+        window.deletePost = async (postId) => {
+            if (!currentUser) return;
+
+            if (confirm('Erase this from the blackboard?')) {
+                try {
+                    await deleteDoc(doc(db, 'blackboard_posts', postId));
+                } catch (error) {
+                    console.error('Error deleting post:', error);
+                    alert('Error deleting: ' + error.message);
+                }
+            }
+        };
+
+        // Load posts
+        const postsQuery = query(collection(db, 'blackboard_posts'), orderBy('createdAt', 'desc'));
+        onSnapshot(postsQuery, (snapshot) => {
+            const container = document.getElementById('postsContainer');
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="no-posts">The blackboard is empty... be the first to write!</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+                
+                const date = post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Just now';
+                
+                const canDelete = currentUser && (currentUser.uid === post.authorId || currentUser.email === adminEmail);
+                
+                postCard.innerHTML = `
+                    <div class="post-title">${escapeHtml(post.title)}</div>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                    <div class="post-meta">
+                        <span class="post-author">~ ${escapeHtml(post.author)}</span>
+                        <span class="post-date">${date}</span>
+                    </div>
+                    ${canDelete ? `<button class="delete-btn" onclick="deletePost('${doc.id}')">Erase ✗</button>` : ''}
+                `;
+                
+                container.appendChild(postCard);
+            });
+        });
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
