@@ -1,0 +1,20 @@
+{
+  "name": "forum-languapps",
+  "version": "1.0.0",
+  "description": "forum.languapps.com - Discord/Google auth + Lambda",
+  "main": "lambda/discord-endpoint.js",
+  "scripts": {
+    "start": "node lambda/discord-endpoint.js",
+    "dev": "nodemon lambda/discord-endpoint.js",
+    "deploy": "serverless deploy"
+  },
+  "dependencies": {
+    "firebase": "^10.0.0",
+    "google-auth-library": "^9.0.0",
+    "node-fetch": "^2.7.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
