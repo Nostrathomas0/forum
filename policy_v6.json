@@ -1,0 +1,41 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetMultiRegionAccessPointPolicyStatus",
+        "s3:GetAccessPoint",
+        "s3:GetObjectRetention",
+        "s3:GetMultiRegionAccessPointPolicy",
+        "s3:GetObjectVersionTagging",
+        "s3:GetMultiRegionAccessPoint",
+        "s3:GetObjectAttributes",
+        "s3:GetObjectLegalHold",
+        "s3:GetObjectVersionAttributes",
+        "s3:GetObjectVersionTorrent",
+        "s3:GetObjectAcl",
+        "s3:GetObject",
+        "s3:GetObjectTorrent",
+        "s3:GetAccountPublicAccessBlock",
+        "access-analyzer:GetGeneratedPolicy",
+        "s3:GetObjectVersionAcl",
+        "access-analyzer:ValidatePolicy",
+        "s3:GetObjectTagging",
+        "s3:GetObjectVersionForReplication",
+        "s3:GetObjectVersion",
+        "access-analyzer:ListPolicyGenerations",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:GetFunction",
+        "lambda:CreateFunction",
+        "lambda:InvokeFunction",
+        "lambda:ListFunctions"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
