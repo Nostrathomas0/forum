@@ -36,10 +36,10 @@ jobs:
             --exclude "lambda/*" \
             --exclude "*.md" \
             --exclude ".gitignore" \
-            --exclude "package*.json" \
-            --exclude "*.js" \
+            --exclude "package.json" \
+            --exclude "package-lock.json" \
+            --exclude "discord-endpoint.js" \
             --exclude "policy*.json" \
-            --include "assets/*" \
             --delete
       
       - name: Invalidate CloudFront
