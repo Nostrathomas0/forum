@@ -33,5 +33,5 @@ jobs:
         run: |
           zip -r function.zip lambda/ node_modules/
           aws lambda update-function-code \
-            --function-name forum-languapps \
+            --function-name languapps-forum \
             --zip-file fileb://function.zip
