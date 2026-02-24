@@ -1,3 +1,4 @@
+// assets/js/switch.js
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 
