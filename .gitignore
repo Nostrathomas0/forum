@@ -143,3 +143,11 @@ node_modules/
 package-lock.json
 lambda/
 *.log
+node_modules/
+package.json
+package-lock.json
+discord-endpoint.js
+policy*.json
+lambda/
+*.log
+.env
