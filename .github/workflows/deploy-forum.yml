@@ -30,16 +30,9 @@ jobs:
       - name: Sync to S3
         run: |
           aws s3 sync . s3://languapps-forum/ \
-            --exclude ".git/*" \
-            --exclude ".github/*" \
-            --exclude "node_modules/*" \
-            --exclude "lambda/*" \
-            --exclude "*.md" \
-            --exclude ".gitignore" \
-            --exclude "package.json" \
-            --exclude "package-lock.json" \
-            --exclude "discord-endpoint.js" \
-            --exclude "policy*.json" \
+            --exclude "*" \
+            --include "index.html" \
+            --include "assets/**" \
             --delete
       
       - name: Invalidate CloudFront
