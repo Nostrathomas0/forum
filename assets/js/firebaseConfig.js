@@ -3,12 +3,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID
+  apiKey: "AIzaSyA_bq5-hmAlNbK-2ZgHSFl0Iew4uphF_Eo",
+  authDomain: "languapps.firebaseapp.com",
+  databaseURL: "https://languapps-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "languapps",
+  storageBucket: "languapps.firebasestorage.app",
+  messagingSenderId: "866735367707",
+  appId: "1:866735367707:web:6154b4ab63fcab0272fabe",
+  measurementId: "G-MCZY61SSMM"
+
 };
 
 const app = initializeApp(firebaseConfig);
