@@ -1,0 +1,512 @@
+/* bird-game.css */
+.bird-game {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.game-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.player-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.difficulty-select {
+    text-align: center;
+}
+
+.difficulty-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-difficulty {
+    padding: 2rem 1rem;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-difficulty:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.game-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat {
+    background: rgba(255,255,255,0.2);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 0.25rem;
+}
+
+.guess-history {
+    background: rgba(0,0,0,0.2);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.guess-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 2fr 60px;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.guess-number {
+    opacity: 0.6;
+    font-size: 0.9rem;
+}
+
+.guess-word {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.guess-feedback {
+    font-size: 1.2rem;
+}
+
+.guess-points {
+    text-align: right;
+    color: #4ade80;
+    font-weight: bold;
+}
+
+.guess-input-area {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#guess-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 0.5rem;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+#guess-input::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+.btn-primary, .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #4ade80;
+    color: #1a1a1a;
+}
+
+.btn-primary:hover {
+    background: #22c55e;
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.game-message {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: bold;
+    display: none;
+}
+
+.game-message.success {
+    background: rgba(74, 222, 128, 0.3);
+}
+
+.game-message.error {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.game-message.info {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.game-message.warning {
+    background: rgba(251, 191, 36, 0.3);
+}
+
+.leaderboard-list {
+    background: rgba(0,0,0,0.2);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}
+
+.leaderboard-entry {
+    display: grid;
+    grid-template-columns: 50px 1fr auto;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.1);
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.leaderboard-entry.current-player {
+    background: rgba(74, 222, 128, 0.3);
+    border: 2px solid rgba(74, 222, 128, 0.5);
+}
+
+.rank {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+    
+body {
+    background: #1a3a1a;
+    background-image: 
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 4px),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 4px);
+    font-family: 'Caveat', cursive;
+    color: #e8e8e8;
+    min-height: 100vh;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="8" fill="white" opacity="0.7"/></svg>'), auto;
+}
+
+.chalk-dust {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: 
+        radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 50px 50px, 80px 80px;
+    background-position: 0 0, 40px 40px;
+    opacity: 0.3;
+    z-index: -1;
+}
+
+header {
+    background: linear-gradient(180deg, #0d260d 0%, #1a3a1a 100%);
+    padding: 30px 20px;
+    text-align: center;
+    border-bottom: 5px solid #8b4513;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: repeating-linear-gradient(90deg, #8b4513 0px, #8b4513 20px, #a0522d 20px, #a0522d 40px);
+}
+
+h1 {
+    font-family: 'Permanent Marker', cursive;
+    color: #fff;
+    font-size: 3em;
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+    margin-bottom: 10px;
+    transform: rotate(-1deg);
+}
+
+.subtitle {
+    font-size: 1.5em;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.auth-box {
+    background: rgba(26, 58, 26, 0.9);
+    border: 3px solid #8b4513;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+.auth-box h2 {
+    font-family: 'Permanent Marker', cursive;
+    color: #ffd700;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.3em;
+}
+
+.user-info span {
+    color: #90EE90;
+    font-weight: bold;
+}
+
+button {
+    background: #8b4513;
+    color: white;
+    border: 2px solid #a0522d;
+    padding: 12px 25px;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1em;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s;
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.4);
+}
+
+button:hover {
+    background: #a0522d;
+    transform: translateY(-2px);
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.6);
+}
+
+.write-post-box {
+    background: rgba(26, 58, 26, 0.95);
+    border: 4px dashed #ffd700;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+.write-post-box h2 {
+    font-family: 'Permanent Marker', cursive;
+    color: #ffd700;
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 15px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.3em;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: #ffd700;
+    background: rgba(255,255,255,0.15);
+}
+
+textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.post-card {
+    background: rgba(255, 248, 220, 0.95);
+    border: 3px solid #8b4513;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+    position: relative;
+    transform: rotate(-1deg);
+    transition: all 0.3s;
+    color: #2c2c2c;
+}
+
+.post-card:nth-child(even) {
+    transform: rotate(1deg);
+}
+
+.post-card:hover {
+    transform: rotate(0deg) scale(1.05);
+    box-shadow: 8px 8px 25px rgba(0,0,0,0.7);
+    z-index: 10;
+}
+
+.post-card::before {
+    content: '📌';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+}
+
+.post-title {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.5em;
+    color: #8b4513;
+    margin-bottom: 15px;
+    word-wrap: break-word;
+}
+
+.post-content {
+    font-size: 1.2em;
+    line-height: 1.6;
+    color: #3c3c3c;
+    margin-bottom: 15px;
+    word-wrap: break-word;
+}
+
+.post-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    color: #666;
+    padding-top: 15px;
+    border-top: 2px dashed rgba(139, 69, 19, 0.3);
+}
+
+.post-author {
+    font-weight: bold;
+    color: #8b4513;
+}
+
+.post-date {
+    font-style: italic;
+}
+
+.delete-btn {
+    background: #d32f2f;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+
+.delete-btn:hover {
+    background: #b71c1c;
+}
+
+.eraser {
+    width: 80px;
+    height: 40px;
+    background: linear-gradient(135deg, #f5f5dc 0%, #fffacd 100%);
+    border: 2px solid #8b4513;
+    border-radius: 5px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 1000;
+}
+
+.eraser:hover {
+    transform: rotate(15deg) scale(1.1);
+}
+
+.no-posts {
+    text-align: center;
+    font-size: 2em;
+    color: rgba(255,255,255,0.5);
+    margin: 100px 0;
+    font-family: 'Permanent Marker', cursive;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+    
+    .posts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+}
