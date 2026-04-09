@@ -3,21 +3,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Greenbird</title>
-    <link rel="shortcut icon" href="assets/image/yata.svg">
-    <link rel="stylesheet" href="assets/css/main.css">
+    <title>Greenbird</title>
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
-        
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="shortcut icon" href="assets/image/yata.svg">
    
-    </style>
+    <!-- FIREBASE IMPORT MAP -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js",
+                "firebase/storage": "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"
+            }
+        }
+    </script>
+    
+    <!-- MAIN FIREBASE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_bq5-hmAlNbK-2ZgHSFl0Iew4uphF_Eo",
+            authDomain: "languapps.firebaseapp.com",
+            projectId: "languapps",
+            storageBucket: "languapps.firebasestorage.app",
+            messagingSenderId: "866735367707",
+            appId: "1:866735367707:web:6154b4ab63fcab0272fabe"
+        };
+
+        // Initialize
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        const provider = new GoogleAuthProvider();
+
+        // Make globally available
+        window.firebase = { app, auth, db, storage };
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseStorage = storage;
+        window.db = db;
+        window.auth = auth;
+        window.storage = storage;
+
+        // Helper functions
+        window.serverTimestamp = serverTimestamp;
+        window.collection = collection;
+        window.addDoc = addDoc;
+
+        let currentUser = null;
+        const adminEmail = "thomas@languapps.com"; // lowercase for comparison
+        
+        console.log('Firebase initialized');
+
+        // ==========================================
+        // AUTH STATE OBSERVER
+        // ==========================================
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            
+            const authSection = document.getElementById('authSection');
+            const userSection = document.getElementById('userSection');
+            const writePostBox = document.getElementById('writePostBox');
+            const eraser = document.querySelector('.eraser');
+            
+            if (user) {
+                if (authSection) authSection.style.display = 'none';
+                if (userSection) userSection.style.display = 'block';
+                if (writePostBox) writePostBox.style.display = 'block';
+                if (document.getElementById('userName')) {
+                    document.getElementById('userName').textContent = user.displayName || user.email;
+                }
+                
+                // Show eraser for admin only
+                if (eraser) {
+                    eraser.style.display = user.email?.toLowerCase() === adminEmail ? 'block' : 'none';
+                }
+            } else {
+                if (authSection) authSection.style.display = 'block';
+                if (userSection) userSection.style.display = 'none';
+                if (writePostBox) writePostBox.style.display = 'none';
+                if (eraser) eraser.style.display = 'none';
+            }
+        });
+
+        // ==========================================
+        // SIGN IN / SIGN OUT
+        // ==========================================
+        window.signInWithGoogle = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error('Sign in error:', error);
+                alert('Error signing in: ' + error.message);
+            }
+        };
+
+        window.signOut = async () => {
+            try {
+                await firebaseSignOut(auth);
+            } catch (error) {
+                console.error('Sign out error:', error);
+            }
+        };
+
+        // ==========================================
+        // CREATE POST (with optional image)
+        // ==========================================
+        window.createPost = async () => {
+            if (!currentUser) {
+                alert('Please sign in first!');
+                return;
+            }
+
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            const imageFile = document.getElementById('postImage').files[0];
+            
+            if (!title && !content && !imageFile) {
+                alert('Please add a title, content, or image!');
+                return;
+            }
+
+            try {
+                let imageUrl = null;
+                
+                // Upload image if present
+                if (imageFile) {
+                    if (imageFile.size > 2 * 1024 * 1024) {
+                        alert('Image too large (max 2MB)');
+                        return;
+                    }
+                    
+                    const timestamp = Date.now();
+                    const filename = `${currentUser.uid}_${timestamp}_${imageFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+                    const storageRef = ref(storage, `greenboard_images/${filename}`);
+                    
+                    const uploadResult = await uploadBytes(storageRef, imageFile);
+                    imageUrl = await getDownloadURL(uploadResult.ref);
+                }
+                
+                // Create post data
+                const postData = {
+                    title: title || (imageUrl ? '📷 Image Post' : 'Untitled'),
+                    content: content || '',
+                    author: currentUser.displayName || currentUser.email,
+                    authorId: currentUser.uid,
+                    authorEmail: currentUser.email,
+                    createdAt: serverTimestamp()
+                };
+                
+                if (imageUrl) {
+                    postData.imageUrl = imageUrl;
+                    postData.hasImage = true;
+                }
+                
+                await addDoc(collection(db, 'blackboard_posts'), postData);
+                
+                // Clear form
+                document.getElementById('postTitle').value = '';
+                document.getElementById('postContent').value = '';
+                document.getElementById('postImage').value = '';
+                
+                alert('Posted to the greenbird! ✓');
+                
+            } catch (error) {
+                console.error('Error creating post:', error);
+                alert('Error posting: ' + error.message);
+            }
+        };
+
+        // ==========================================
+        // DELETE POST
+        // ==========================================
+        window.deletePost = async (postId) => {
+            if (!currentUser) return;
+            
+            const isAdmin = currentUser.email?.toLowerCase() === adminEmail;
+            
+            // Get post to check author
+            const postRef = doc(db, 'blackboard_posts', postId);
+            
+            if (confirm('Erase this from the greenbird?')) {
+                try {
+                    await deleteDoc(postRef);
+                } catch (error) {
+                    console.error('Error deleting post:', error);
+                    alert('Error deleting: ' + error.message);
+                }
+            }
+        };
+
+        // ==========================================
+        // IMAGE UPLOAD (standalone)
+        // ==========================================
+        window.uploadImage = async () => {
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput?.files[0];
+            
+            if (!file) {
+                alert('Select a file first');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('Sign in to upload');
+                return;
+            }
+            
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File too large. Max 2MB');
+                return;
+            }
+            
+            const preview = document.getElementById('uploadPreview');
+            if (preview) preview.innerHTML = 'Uploading...';
+            
+            try {
+                const timestamp = Date.now();
+                const filename = `${currentUser.uid}_${timestamp}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+                const storageRef = ref(storage, `greenboard_images/${filename}`);
+                
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+                
+                await addDoc(collection(db, 'blackboard_posts'), {
+                    type: 'image',
+                    title: file.name,
+                    content: '',
+                    imageUrl: downloadURL,
+                    hasImage: true,
+                    author: currentUser.displayName || currentUser.email,
+                    authorId: currentUser.uid,
+                    authorEmail: currentUser.email,
+                    createdAt: serverTimestamp()
+                });
+                
+                if (preview) preview.innerHTML = '✅ Image posted!';
+                fileInput.value = '';
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                if (preview) preview.innerHTML = `❌ Upload failed: ${error.message}`;
+                alert('Upload failed: ' + error.message);
+            }
+        };
+
+        // ==========================================
+        // LOAD POSTS (REAL-TIME)
+        // ==========================================
+        const postsQuery = query(collection(db, 'blackboard_posts'), orderBy('createdAt', 'desc'));
+        
+        onSnapshot(postsQuery, (snapshot) => {
+            const container = document.getElementById('postsContainer');
+            
+            if (!container) return;
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="no-posts">The greenbird is empty... be the first to write!</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+                
+                const date = post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString() : 'Just now';
+                
+                // Check if current user can delete
+                const canDelete = currentUser && (
+                    currentUser.uid === post.authorId || 
+                    currentUser.email?.toLowerCase() === adminEmail
+                );
+                
+                // Image HTML if present
+                let imageHtml = '';
+                if (post.hasImage && post.imageUrl) {
+                    imageHtml = `
+                        <div style="margin: 15px 0; text-align: center;">
+                            <img src="${post.imageUrl}" 
+                                 style="max-width: 100%; max-height: 300px; border-radius: 8px; cursor: pointer;" 
+                                 onclick="window.open('${post.imageUrl}', '_blank')"
+                                 alt="${escapeHtml(post.title)}">
+                        </div>
+                    `;
+                }
+                
+                postCard.innerHTML = `
+                    <div class="post-title">${post.type === 'image' ? '🖼️' : '📜'} ${escapeHtml(post.title)}</div>
+                    ${imageHtml}
+                    <div class="post-content">${escapeHtml(post.content || '')}</div>
+                    <div class="post-meta">
+                        <span class="post-author">🐦 ${escapeHtml(post.author)}</span>
+                        <span class="post-date">${date}</span>
+                    </div>
+                    ${canDelete ? `<button class="delete-btn" onclick="deletePost('${doc.id}')">Erase ✗</button>` : ''}
+                `;
+                
+                container.appendChild(postCard);
+            });
+        });
+
+        // ==========================================
+        // CLEAR ALL POSTS (ADMIN ONLY)
+        // ==========================================
+        window.clearAllPosts = async () => {
+            if (!currentUser || currentUser.email?.toLowerCase() !== adminEmail) {
+                alert('Admin only');
+                return;
+            }
+            
+            if (confirm('⚠️ ERASE ALL POSTS? This cannot be undone!')) {
+                const snapshot = await getDocs(collection(db, 'blackboard_posts'));
+                const deletePromises = [];
+                snapshot.forEach(doc => deletePromises.push(deleteDoc(doc.ref)));
+                await Promise.all(deletePromises);
+                alert('All posts erased.');
+            }
+        };
+
+        // ==========================================
+        // HELPER: ESCAPE HTML
+        // ==========================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Need getDocs for clearAllPosts
+        import { getDocs } from 'firebase/firestore';
+        window.getDocs = getDocs;
+        
+        console.log('Greenbird ready');
+    </script>
 </head>
 <body>
+    <!-- Ambient light effect -->
+    <div class="ambient-light">
+        <div class="light-pool" id="lightPool"></div>
+    </div>
+
     <div class="chalk-dust"></div>
     
     <header>
-        <h1> The Greenbird</h1>
-        <p class="subtitle">Share your little picture </p>
+        <h1>The Greenbird</h1>
+        <p class="subtitle">Share your little picture</p>
     </header>
+    
+    <div class="image-upload-box">
+        <h2>Use a little image</h2>
+        <input type="file" id="imageUpload" accept="image/svg+xml,image/png,image/jpeg">
+        <button onclick="uploadImage()">Post Image</button>
+        <div id="uploadPreview"></div>
+    </div>
     
     <div class="container">
         <!-- Auth Section -->
@@ -37,167 +386,24 @@
         
         <!-- Write Post Section (only visible when logged in) -->
         <div class="write-post-box" id="writePostBox" style="display: none;">
-            <h2>✍️ Write on the bird</h2>
+            <h2>✍️ Right on the bird</h2>
             <input type="text" id="postTitle" placeholder="Title your thought..." maxlength="100">
             <textarea id="postContent" placeholder="Share what you learned today..."></textarea>
+            
+            <div style="margin: 15px 0;">
+                <input type="file" id="postImage" accept="image/svg+xml,image/png,image/jpeg">
+                <small style="color: rgba(255,255,255,0.7);">Optional: Add an image (max 2MB)</small>
+            </div>
+            
             <button onclick="createPost()">to th' b'rd</button>
         </div>
         
         <!-- Posts Display -->
         <div id="postsContainer" class="posts-grid">
-            <div class="no-posts">Th' greenb'rd is empty... be th; first to write!</div>
+            <div class="no-posts">The greenbird is empty... be the first to write!</div>
         </div>
     </div>
     
-    <div class="eraser" title="Erase posts (Admin only)"></div>
-
-    <!-- Firebase -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA_bq5-hmAlNbK-2ZgHSFl0Iew4uphF_Eo",
-            authDomain: "languapps.firebaseapp.com",
-            projectId: "languapps",
-            storageBucket: "languapps.firebasestorage.app",
-            messagingSenderId: "866735367707",
-            appId: "1:866735367707:web:6154b4ab63fcab0272fabe"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        let currentUser = null;
-        const adminEmail = "Thomas@languapps.com"; // Change to your email
-
-        // Auth state observer
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('userSection').style.display = 'block';
-                document.getElementById('writePostBox').style.display = 'block';
-                document.getElementById('userName').textContent = user.displayName || user.email;
-            } else {
-                document.getElementById('authSection').style.display = 'block';
-                document.getElementById('userSection').style.display = 'none';
-                document.getElementById('writePostBox').style.display = 'none';
-            }
-        });
-
-        // Sign in
-        window.signInWithGoogle = async () => {
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error('Sign in error:', error);
-                alert('Error signing in: ' + error.message);
-            }
-        };
-
-        // Sign out
-        window.signOut = async () => {
-            try {
-                await firebaseSignOut(auth);
-            } catch (error) {
-                console.error('Sign out error:', error);
-            }
-        };
-
-        // Create post
-        window.createPost = async () => {
-            if (!currentUser) {
-                alert('Please sign in first!');
-                return;
-            }
-
-            const title = document.getElementById('postTitle').value.trim();
-            const content = document.getElementById('postContent').value.trim();
-
-            if (!title || !content) {
-                alert('Please fill in both title and content!');
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, 'blackboard_posts'), {
-                    title: title,
-                    content: content,
-                    author: currentUser.displayName || currentUser.email,
-                    authorId: currentUser.uid,
-                    authorEmail: currentUser.email,
-                    createdAt: serverTimestamp()
-                });
-
-                // Clear form
-                document.getElementById('postTitle').value = '';
-                document.getElementById('postContent').value = '';
-
-                alert('Posted to the blackboard! ✓');
-            } catch (error) {
-                console.error('Error creating post:', error);
-                alert('Error posting: ' + error.message);
-            }
-        };
-
-        // Delete post
-        window.deletePost = async (postId) => {
-            if (!currentUser) return;
-
-            if (confirm('Erase this from the blackboard?')) {
-                try {
-                    await deleteDoc(doc(db, 'blackboard_posts', postId));
-                } catch (error) {
-                    console.error('Error deleting post:', error);
-                    alert('Error deleting: ' + error.message);
-                }
-            }
-        };
-
-        // Load posts
-        const postsQuery = query(collection(db, 'blackboard_posts'), orderBy('createdAt', 'desc'));
-        onSnapshot(postsQuery, (snapshot) => {
-            const container = document.getElementById('postsContainer');
-            
-            if (snapshot.empty) {
-                container.innerHTML = '<div class="no-posts">The blackboard is empty... be the first to write!</div>';
-                return;
-            }
-
-            container.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const post = doc.data();
-                const postCard = document.createElement('div');
-                postCard.className = 'post-card';
-                
-                const date = post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Just now';
-                
-                const canDelete = currentUser && (currentUser.uid === post.authorId || currentUser.email === adminEmail);
-                
-                postCard.innerHTML = `
-                    <div class="post-title">${escapeHtml(post.title)}</div>
-                    <div class="post-content">${escapeHtml(post.content)}</div>
-                    <div class="post-meta">
-                        <span class="post-author">~ ${escapeHtml(post.author)}</span>
-                        <span class="post-date">${date}</span>
-                    </div>
-                    ${canDelete ? `<button class="delete-btn" onclick="deletePost('${doc.id}')">Erase ✗</button>` : ''}
-                `;
-                
-                container.appendChild(postCard);
-            });
-        });
-
-        // Escape HTML to prevent XSS
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-    </script>
+    <div class="eraser" title="Erase posts (Admin only)" onclick="clearAllPosts()"></div>
 </body>
 </html>
